@@ -1,2 +1,2 @@
-.specify/** linguist-vendored
-*.sh linguist-vendored
+.specify/** linguist-detectable=false
+*.sh linguist-detectable=false
