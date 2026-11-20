@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Invaders Neon</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <main id="game-shell">
+    <h1 class="sr-only">Space Invaders Neon</h1>
+    <canvas id="game" width="960" height="600" aria-label="Campo de juego"></canvas>
+
+    <section id="start-screen" class="screen">
+      <h2 class="screen__title">SPACE INVADERS <span>NEON</span></h2>
+      <p class="screen__hint">Usa las flechas para moverte y ESPACIO para disparar</p>
+      <p class="screen__record">Récord: <span id="start-best">0</span></p>
+      <button id="start-button" class="neon-button" type="button">Empezar partida</button>
+    </section>
+
+    <section id="gameover-screen" class="screen hidden">
+      <h2 class="screen__title">FIN DE LA PARTIDA</h2>
+      <p class="screen__score">Puntuación: <span id="final-score">0</span></p>
+      <p class="screen__record">Récord: <span id="final-best">0</span></p>
+      <button id="restart-button" class="neon-button" type="button">Reiniciar</button>
+    </section>
+  </main>
+
+  <script src="src/core/config.js"></script>
+  <script src="src/entities/ship.js"></script>
+  <script src="src/entities/invader.js"></script>
+  <script src="src/entities/bullet.js"></script>
+  <script src="src/entities/formation.js"></script>
+  <script src="src/state/game-state.js"></script>
+  <script src="src/state/record.js"></script>
+  <script src="src/input/keyboard.js"></script>
+  <script src="src/render/theme.js"></script>
+  <script src="src/render/sprites.js"></script>
+  <script src="src/render/renderer.js"></script>
+  <script src="src/ui/screens.js"></script>
+  <script src="src/core/game.js"></script>
+  <script src="src/audio/sound.js"></script>
+  <script src="src/core/loop.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      var J = window.JuegoIA;
+      var config = J.config.config;
+      var storage = null;
+      try {
+        storage = window.localStorage;
+      } catch (error) {
+        storage = null;
+      }
+      var store = J.record.createRecordStore(storage, config);
+      var loaded = store.load();
+      var state = J.gameState.createGameState(config, loaded.value);
+      var input = J.keyboard.createInput(window);
+      var sound = J.sound.createSoundEngine();
+      window.addEventListener('pointerdown', function () { sound.unlock(); }, { once: true });
+      window.addEventListener('keydown', function () { sound.unlock(); }, { once: true });
+      var sprites = J.sprites.createSpriteCache(config, J.theme.theme);
+      var renderer = J.renderer.createRenderer(
+        document.getElementById('game'), config, J.theme.theme, sprites
+      );
+      var screens = J.screens.createScreens({
+        startScreen: document.getElementById('start-screen'),
+        gameoverScreen: document.getElementById('gameover-screen'),
+        startButton: document.getElementById('start-button'),
+        restartButton: document.getElementById('restart-button'),
+        startBest: document.getElementById('start-best'),
+        finalScore: document.getElementById('final-score'),
+        finalBest: document.getElementById('final-best')
+      });
+      J.loop.createLoop({
+        state: state,
+        config: config,
+        input: input,
+        renderer: renderer,
+        screens: screens,
+        store: store,
+        sound: sound,
+        best: loaded.value
+      });
+      screens.showStart(loaded.value);
+    }());
+  </script>
+</body>
+</html>
